@@ -91,13 +91,14 @@ def conversation(thread_ts, prompt, channel, say: Say):
 
             counter = counter + 1
 
+        chat_update(channel, message, latest_ts)
+
         put_context(thread_ts, conversation_id, parent_id)
     except Exception as e:
         print(thread_ts, "Error handling message: {}".format(e))
         message = "Sorry, I could not process your request.\nhttps://status.openai.com"
 
-    if message != "":
-        chat_update(channel, message, latest_ts)
+        say(text=message, thread_ts=thread_ts)
 
 
 # Handle the app_mention event
