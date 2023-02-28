@@ -1,0 +1,43 @@
+service: lambda-chatgpt-slack-bot
+provider:
+  name: aws
+  region: us-east-1
+  runtime: python3.9
+  # stage: prod
+  timeout: 120
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - "arn:aws:dynamodb:us-east-1:968005369378:table/chatgpt-slack-bot-context"
+
+functions:
+  chatgpt:
+    handler: handler.lambda_handler
+    layers:
+      - arn:aws:lambda:us-east-1:968005369378:layer:chatgpt-slack-layer:1
+    events:
+      - http:
+          method: post
+          path: /slack/events
+
+resources:
+  Resources:
+    DynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: chatgpt-slack-bot-context # ${self:provider.environment.DYNAMODB_TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+plugins:
+  - serverless-python-requirements
+  - serverless-dotenv-plugin
