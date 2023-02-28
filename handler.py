@@ -33,6 +33,7 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 
+# Get the context from DynamoDB
 def get_context(id):
     item = table.get_item(Key={"id": id}).get("Item")
     return (
@@ -42,6 +43,7 @@ def get_context(id):
     )
 
 
+# Put the context in DynamoDB
 def put_context(id, conversation_id="", parent_id="", prompt=""):
     table.put_item(
         Item={
@@ -118,6 +120,7 @@ def handle_app_mentions(body: dict, say: Say):
     conversation(thread_ts, prompt, event["channel"], say)
 
 
+# Handle the message event
 def lambda_handler(event, context):
     body = json.loads(event["body"])
 
