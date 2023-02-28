@@ -79,13 +79,15 @@ def conversation(thread_ts, prompt, channel, say: Say):
         for response in chatbot.ask(prompt, conversation_id, parent_id):
             message = response["message"]
 
-            if counter % 16 == 10:
-                chat_update(channel, message + " " + CHATGPT_CURSOR, latest_ts)
-
             conversation_id, parent_id = (
                 response["conversation_id"],
                 response["parent_id"],
             )
+
+            if counter % 16 == 1:
+                chat_update(channel, message + " " + CHATGPT_CURSOR, latest_ts)
+
+                put_context(thread_ts, conversation_id, parent_id)
 
             counter = counter + 1
 
