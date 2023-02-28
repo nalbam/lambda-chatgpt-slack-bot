@@ -75,15 +75,19 @@ def conversation(thread_ts, prompt, channel, say: Say):
 
     try:
         # Send the prompt to ChatGPT
+        counter = 0
         for response in chatbot.ask(prompt, conversation_id, parent_id):
             message = response["message"]
 
-            chat_update(channel, message + " " + CHATGPT_CURSOR, latest_ts)
+            if counter % 16 == 10:
+                chat_update(channel, message + " " + CHATGPT_CURSOR, latest_ts)
 
             conversation_id, parent_id = (
                 response["conversation_id"],
                 response["parent_id"],
             )
+
+            counter = counter + 1
 
         put_context(thread_ts, conversation_id, parent_id)
     except Exception as e:
