@@ -29,9 +29,6 @@ app = App(
 # Set up ChatGPT API credentials
 CHATGPT_ACCESS_TOKEN = os.environ["CHATGPT_ACCESS_TOKEN"]
 
-# # Initialize ChatGPT
-# chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN})
-
 
 # Get the context from DynamoDB
 def get_context(id):
