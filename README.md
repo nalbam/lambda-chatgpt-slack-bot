@@ -1,7 +1,5 @@
 # lambda-chatgpt-slack-bot
 
-* <https://pypi.org/project/revChatGPT/>
-
 ## Install
 
 ```bash
@@ -33,13 +31,39 @@ Set scopes in Event Subscriptions - Subscribe to bot events
 app_mention
 ```
 
+## Credentials
+
+```bash
+$ cp .env.example .env
+```
+
+### Slack Bot
+
+```bash
+SLACK_BOT_TOKEN="xoxb-xxxx"
+SLACK_SIGNING_SECRET="xxxx"
+```
+
+### ChatGPT
+
+* <https://pypi.org/project/revChatGPT/>
+* <https://chat.openai.com/api/auth/session>
+
+```json
+{
+  "access_token": "<access_token>"
+}
+```
+
+```bash
+CHATGPT_ACCESS_TOKEN="<access_token>"
+```
+
 ## Deployment
 
 In order to deploy the example, you need to run the following command:
 
 ```bash
-$ cp .env.example .env
-
 $ sls deploy
 ```
 
