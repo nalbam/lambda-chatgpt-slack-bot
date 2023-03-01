@@ -59,6 +59,12 @@ SLACK_SIGNING_SECRET="xxxx"
 CHATGPT_ACCESS_TOKEN="<access_token>"
 ```
 
+## AWS Lambda layer
+
+Upload this file to your AWS Lambda layers.
+
+* [chatgpt-slack-layer.zip](https://github.com/nalbam/lambda-chatgpt-slack-bot/tree/main/layer/chatgpt-slack-layer.zip)
+
 ## Deployment
 
 In order to deploy the example, you need to run the following command:
