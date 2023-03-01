@@ -61,7 +61,8 @@ def chat_update(channel, message, latest_ts):
 # Handle the chatgpt conversation
 def chatbot_ask(prompt, conversation_id, parent_id, channel, latest_ts, thread_ts):
     # Initialize ChatGPT
-    chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN}, conversation_id=conversation_id, parent_id=parent_id)
+    # chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN}, conversation_id=conversation_id, parent_id=parent_id)
+    chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN})
 
     # Send the prompt to ChatGPT
     counter = 0
