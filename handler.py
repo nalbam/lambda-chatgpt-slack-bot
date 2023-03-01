@@ -29,8 +29,8 @@ app = App(
 # Set up ChatGPT API credentials
 CHATGPT_ACCESS_TOKEN = os.environ["CHATGPT_ACCESS_TOKEN"]
 
-# Initialize ChatGPT
-chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN})
+# # Initialize ChatGPT
+# chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN})
 
 
 # Get the context from DynamoDB
@@ -62,6 +62,33 @@ def chat_update(channel, message, latest_ts):
 
 
 # Handle the chatgpt conversation
+def chatbot_ask(prompt, conversation_id, parent_id, channel, latest_ts, thread_ts):
+    # Initialize ChatGPT
+    chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN}, conversation_id=conversation_id, parent_id=parent_id)
+
+    # Send the prompt to ChatGPT
+    counter = 0
+    for response in chatbot.ask(prompt, conversation_id, parent_id):
+        message = response["message"]
+
+        conversation_id, parent_id = (
+            response["conversation_id"],
+            response["parent_id"],
+        )
+
+        if counter % 16 == 1:
+            chat_update(channel, message + " " + BOT_CURSOR, latest_ts)
+            put_context(thread_ts, conversation_id, parent_id)
+
+        counter = counter + 1
+
+    chat_update(channel, message, latest_ts)
+    put_context(thread_ts, conversation_id, parent_id)
+
+    return message
+
+
+# Handle the chatgpt conversation
 def conversation(thread_ts, prompt, channel, say: Say):
     print(thread_ts, prompt)
 
@@ -72,26 +99,8 @@ def conversation(thread_ts, prompt, channel, say: Say):
     conversation_id, parent_id, _ = get_context(thread_ts)
 
     try:
-        # Send the prompt to ChatGPT
-        counter = 0
-        for response in chatbot.ask(prompt, conversation_id, parent_id):
-            message = response["message"]
+        chatbot_ask(prompt, conversation_id, parent_id, channel, latest_ts, thread_ts)
 
-            conversation_id, parent_id = (
-                response["conversation_id"],
-                response["parent_id"],
-            )
-
-            if counter % 16 == 1:
-                chat_update(channel, message + " " + BOT_CURSOR, latest_ts)
-
-                put_context(thread_ts, conversation_id, parent_id)
-
-            counter = counter + 1
-
-        chat_update(channel, message, latest_ts)
-
-        put_context(thread_ts, conversation_id, parent_id)
     except Exception as e:
         print(thread_ts, "Error handling message: {}".format(e))
         message = "Sorry, I could not process your request.\nhttps://status.openai.com"
