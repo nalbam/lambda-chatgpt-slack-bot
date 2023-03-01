@@ -6,6 +6,12 @@ on:
       - main
       - master
 
+env:
+  SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+  SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+  CHATGPT_ACCESS_TOKEN: ${{ secrets.CHATGPT_ACCESS_TOKEN }}
+  BOT_CURSOR: ${{ secrets.BOT_CURSOR }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
