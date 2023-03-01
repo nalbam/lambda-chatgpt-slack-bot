@@ -7,17 +7,25 @@ from revChatGPT.V1 import Chatbot
 from slack_bolt import App, Say
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 
-# Set up ChatGPT API credentials
-CHATGPT_ACCESS_TOKEN = os.environ["CHATGPT_ACCESS_TOKEN"]
-CHATGPT_CURSOR = os.environ.get("CHATGPT_CURSOR", ":robot_face:")
+BOT_CURSOR = os.environ.get("BOT_CURSOR", ":robot_face:")
 
-# Initialize ChatGPT
-chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN})
+SLACK_BOT_TOKEN_KEY = os.environ.get("SLACK_BOT_TOKEN_KEY", "/chatgpt/slack/bot/token")
+SLACK_SIGNING_SECRET_KEY = os.environ.get("SLACK_SIGNING_SECRET_KEY", "/chatgpt/slack/signing/secret")
+
+CHATGPT_ACCESS_TOKEN_KEY = os.environ.get("CHATGPT_ACCESS_TOKEN_KEY", "/chatgpt/access/token")
+
+# Set up SSM and DynamoDB
+client = boto3.client("ssm")
+
+# Keep track of conversation history by thread
+DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME", "chatgpt-slack-bot-context")
+
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 # Set up Slack API credentials
-SLACK_APP_TOKEN = os.environ["SLACK_APP_TOKEN"]
-SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
-SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
+SLACK_BOT_TOKEN = client.get_parameter(Name=SLACK_BOT_TOKEN_KEY, WithDecryption=True)["Parameter"]["Value"]
+SLACK_SIGNING_SECRET = client.get_parameter(Name=SLACK_SIGNING_SECRET_KEY, WithDecryption=True)["Parameter"]["Value"]
 
 # Initialize Slack app
 app = App(
@@ -26,21 +34,17 @@ app = App(
     process_before_response=True,
 )
 
-# Keep track of conversation history by thread
-DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME", "chatgpt-slack-bot-context")
+# Set up ChatGPT API credentials
+CHATGPT_ACCESS_TOKEN = client.get_parameter(Name=CHATGPT_ACCESS_TOKEN_KEY, WithDecryption=True)["Parameter"]["Value"]
 
-dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+# Initialize ChatGPT
+chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN})
 
 
 # Get the context from DynamoDB
 def get_context(id):
     item = table.get_item(Key={"id": id}).get("Item")
-    return (
-        (item["conversation_id"], item["parent_id"], item["prompt"])
-        if item
-        else ("", "", "")
-    )
+    return (item["conversation_id"], item["parent_id"], item["prompt"]) if item else ("", "", "")
 
 
 # Put the context in DynamoDB
@@ -70,7 +74,7 @@ def conversation(thread_ts, prompt, channel, say: Say):
     print(thread_ts, prompt)
 
     # Keep track of the latest message timestamp
-    result = say(text=CHATGPT_CURSOR, thread_ts=thread_ts)
+    result = say(text=BOT_CURSOR, thread_ts=thread_ts)
     latest_ts = result["ts"]
 
     conversation_id, parent_id, _ = get_context(thread_ts)
@@ -87,7 +91,7 @@ def conversation(thread_ts, prompt, channel, say: Say):
             )
 
             if counter % 16 == 1:
-                chat_update(channel, message + " " + CHATGPT_CURSOR, latest_ts)
+                chat_update(channel, message + " " + BOT_CURSOR, latest_ts)
 
                 put_context(thread_ts, conversation_id, parent_id)
 

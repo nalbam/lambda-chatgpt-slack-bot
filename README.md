@@ -2,6 +2,24 @@
 
 * <https://pypi.org/project/revChatGPT/>
 
+## Save Slack Token
+
+```bash
+$ cp .env.example .env
+
+$ source .env
+
+SLACK_BOT_TOKEN="xxxx"
+SLACK_SIGNING_SECRET="xxxx"
+
+CHATGPT_ACCESS_TOKEN="xxxx"
+
+aws ssm put-parameter --name $SLACK_BOT_TOKEN_KEY --value $SLACK_BOT_TOKEN --type SecureString --overwrite --region $AWS_REGION
+aws ssm put-parameter --name $SLACK_SIGNING_SECRET_KEY --value $SLACK_SIGNING_SECRET --type SecureString --overwrite --region $AWS_REGION
+
+aws ssm put-parameter --name $CHATGPT_ACCESS_TOKEN_KEY --value $CHATGPT_ACCESS_TOKEN --type SecureString --overwrite --region $AWS_REGION
+```
+
 ## Install
 
 ```bash
@@ -38,8 +56,6 @@ app_mention
 In order to deploy the example, you need to run the following command:
 
 ```bash
-$ cp .env.example .env
-
 $ sls deploy
 ```
 
