@@ -9,14 +9,6 @@ from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 
 BOT_CURSOR = os.environ.get("BOT_CURSOR", ":robot_face:")
 
-SLACK_BOT_TOKEN_KEY = os.environ.get("SLACK_BOT_TOKEN_KEY", "/chatgpt/slack/bot/token")
-SLACK_SIGNING_SECRET_KEY = os.environ.get("SLACK_SIGNING_SECRET_KEY", "/chatgpt/slack/signing/secret")
-
-CHATGPT_ACCESS_TOKEN_KEY = os.environ.get("CHATGPT_ACCESS_TOKEN_KEY", "/chatgpt/access/token")
-
-# Set up SSM and DynamoDB
-client = boto3.client("ssm")
-
 # Keep track of conversation history by thread
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME", "chatgpt-slack-bot-context")
 
@@ -24,8 +16,8 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 # Set up Slack API credentials
-SLACK_BOT_TOKEN = client.get_parameter(Name=SLACK_BOT_TOKEN_KEY, WithDecryption=True)["Parameter"]["Value"]
-SLACK_SIGNING_SECRET = client.get_parameter(Name=SLACK_SIGNING_SECRET_KEY, WithDecryption=True)["Parameter"]["Value"]
+SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
+SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
 
 # Initialize Slack app
 app = App(
@@ -35,7 +27,7 @@ app = App(
 )
 
 # Set up ChatGPT API credentials
-CHATGPT_ACCESS_TOKEN = client.get_parameter(Name=CHATGPT_ACCESS_TOKEN_KEY, WithDecryption=True)["Parameter"]["Value"]
+CHATGPT_ACCESS_TOKEN = os.environ["CHATGPT_ACCESS_TOKEN"]
 
 # Initialize ChatGPT
 chatbot = Chatbot(config={"access_token": CHATGPT_ACCESS_TOKEN})
