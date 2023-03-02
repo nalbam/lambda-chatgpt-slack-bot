@@ -77,7 +77,7 @@ def chatbot_ask(prompt, conversation_id, parent_id, channel, latest_ts, thread_t
 
         if counter % 16 == 1:
             chat_update(channel, message + " " + BOT_CURSOR, latest_ts)
-            put_context(thread_ts, conversation_id, parent_id)
+            # put_context(thread_ts, conversation_id, parent_id)
 
         counter = counter + 1
 
