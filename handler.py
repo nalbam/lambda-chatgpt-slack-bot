@@ -66,6 +66,7 @@ def chatbot_ask(prompt, conversation_id, parent_id, channel, latest_ts, thread_t
 
     # Send the prompt to ChatGPT
     counter = 0
+    message = ""
     for response in chatbot.ask(prompt, conversation_id, parent_id):
         message = response["message"]
 
