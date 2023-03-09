@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+import time
 
 from revChatGPT.V1 import Chatbot
 
@@ -38,12 +39,16 @@ def get_context(id):
 
 # Put the context in DynamoDB
 def put_context(id, conversation_id="", parent_id="", prompt=""):
+    current_time = int(time.time())
+    expire_at = current_time + (86400 * 10)
+
     table.put_item(
         Item={
             "id": id,
             "conversation_id": conversation_id,
             "parent_id": parent_id,
             "prompt": prompt,
+            "expire_at": expire_at,
         }
     )
 
