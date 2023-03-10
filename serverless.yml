@@ -5,12 +5,14 @@ provider:
   runtime: python3.9
   # stage: prod
   timeout: 120
+  environment:
+    DYNAMODB_TABLE_NAME: chatgpt-slack-bot-context
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:*
       Resource:
-        - "arn:aws:dynamodb:us-east-1:968005369378:table/chatgpt-slack-bot-context"
+        - "arn:aws:dynamodb:*:*:table/${self:provider.environment.DYNAMODB_TABLE_NAME}"
 
 functions:
   mention:
@@ -27,7 +29,7 @@ resources:
     DynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: chatgpt-slack-bot-context # ${self:provider.environment.DYNAMODB_TABLE_NAME}
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_NAME}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
